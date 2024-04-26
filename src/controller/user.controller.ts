@@ -104,7 +104,7 @@ export const searchByUsername = async (req: Request, res: Response) => {
     const username = String(id);
 
     const users = await userRepository.find({
-      where: { username: Like(`%${username}%`) },
+      where: { username: Like(`${username}%`) },
       relations: { profile: true },
     });
 
