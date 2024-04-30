@@ -18,7 +18,8 @@ router.post("/:id/like", postController.like);
 router.post("/:id/unlike", postController.unlike);
 router.post("/:userId/likes", postController.getLikes);
 
+router.post("/:id/comments", postController.getComments);
 router.post("/:id/comment", postController.comment);
-router.post("/:id/uncomment", postController.uncomment);
+router.delete("/:id/uncomment", postController.uncomment);
 
 export default router;

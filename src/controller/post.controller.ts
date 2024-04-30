@@ -27,7 +27,7 @@ export const getAll = async (req: Request, res: Response) => {
     }
 
     const posts = await postRepository.find({
-      relations: { user: true, comments: true },
+      relations: { user: true, comments: false },
       order: { createdAt: "DESC" },
     });
 
@@ -51,7 +51,6 @@ export const getAll = async (req: Request, res: Response) => {
           },
           likes: post.likes,
           hasLiked: await checkIfUserHasLikedPost(user, post),
-          comments: post.comments,
         };
       })
     );
@@ -70,7 +69,7 @@ export const getById = async (req: Request, res: Response) => {
     if (!userId) {
       const post = await postRepository.findOne({
         where: { id: numericId },
-        relations: { user: true, comments: true },
+        relations: { user: true },
         order: { createdAt: "DESC" },
       });
 
@@ -89,7 +88,6 @@ export const getById = async (req: Request, res: Response) => {
         },
         likes: post.likes,
         hasLiked: false,
-        comments: post.comments,
       };
 
       return res.json(sanitizedPost);
@@ -98,7 +96,7 @@ export const getById = async (req: Request, res: Response) => {
 
     const post = await postRepository.findOne({
       where: { id: numericId },
-      relations: { user: true, comments: true },
+      relations: { user: true },
       order: { createdAt: "DESC" },
     });
 
@@ -130,7 +128,6 @@ export const getById = async (req: Request, res: Response) => {
       },
       likes: post.likes,
       hasLiked: await checkIfUserHasLikedPost(user, post),
-      comments: post.comments,
     };
 
     return res.json(sanitizedPost);
@@ -380,6 +377,7 @@ export const comment = async (req: Request, res: Response) => {
 
     const user = await userRepository.findOne({
       where: { id: numericUserId },
+      relations: { profile: true },
     });
 
     if (!user) {
@@ -390,6 +388,8 @@ export const comment = async (req: Request, res: Response) => {
     comment.user = user;
     comment.post = post;
     comment.text = text;
+    comment.username = user.username;
+    comment.avatar = user.profile.avatar;
 
     let commentSaved = await commentRepository.save(comment);
 
@@ -399,39 +399,25 @@ export const comment = async (req: Request, res: Response) => {
     handleErrorResponse(res, "Error al comentar", 500);
   }
 };
+
 export const uncomment = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const numericId = parseInt(id);
 
-    const { commentId } = req.body;
-    const numericCommentId = parseInt(commentId);
-
-    if (!commentId) {
+    if (!id) {
       return handleErrorResponse(res, "ID de comentario requerido", 400);
     }
 
-    let post = await postRepository.findOne({
-      where: { id: numericId },
-    });
-
-    if (!post) {
-      return handleErrorResponse(res, "Post no encontrado", 404);
-    }
-
     let comment = await commentRepository.findOne({
-      where: { id: numericCommentId },
+      where: { id: numericId },
     });
 
     if (!comment) {
       return handleErrorResponse(res, "Comentario no encontrado", 404);
     }
 
-    const commentToRemove = await commentRepository.findOne({
-      where: { id: numericCommentId },
-    });
-
-    await commentRepository.remove(commentToRemove);
+    await commentRepository.remove(comment);
 
     return res.json({ message: "Comentario eliminado exitosamente" });
   } catch (error) {
@@ -439,6 +425,7 @@ export const uncomment = async (req: Request, res: Response) => {
     handleErrorResponse(res, "Error al descomentar", 500);
   }
 };
+
 export const getPosts = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
@@ -454,7 +441,7 @@ export const getPosts = async (req: Request, res: Response) => {
     }
 
     const posts = await postRepository.find({
-      relations: { user: true, comments: true },
+      relations: { user: true },
       order: { createdAt: "DESC" },
     });
 
@@ -477,7 +464,6 @@ export const getPosts = async (req: Request, res: Response) => {
           },
           likes: post.likes,
           hasLiked: await checkIfUserHasLikedPost(user, post),
-          comments: post.comments,
         };
       })
     );
@@ -525,7 +511,7 @@ export const getLikes = async (req: Request, res: Response) => {
       likes.map(async (like) => {
         const post = await postRepository.findOne({
           where: { id: like.postId },
-          relations: { user: true, comments: true },
+          relations: { user: true },
         });
         const postUser = await userRepository.findOne({
           where: { id: post.user.id },
@@ -541,7 +527,6 @@ export const getLikes = async (req: Request, res: Response) => {
           },
           likes: post.likes,
           hasLiked: await checkIfUserHasLikedPost(user, post),
-          comments: post.comments,
         };
       })
     );
@@ -554,5 +539,22 @@ export const getLikes = async (req: Request, res: Response) => {
       "Error al obtener los post a los que se le ha dado likes",
       500
     );
+  }
+};
+
+export const getComments = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const numericId = parseInt(id);
+
+    const post = await postRepository.findOne({
+      where: { id: numericId },
+      relations: { comments: true },
+    });
+
+    return res.json(post.comments);
+  } catch (error) {
+    console.error(error);
+    handleErrorResponse(res, "Error al obtener los comentarios", 500);
   }
 };

@@ -23,6 +23,12 @@ export class Comment {
   @Column()
   text: string;
 
+  @Column()
+  username: string;
+
+  @Column()
+  avatar: string;
+
   @CreateDateColumn()
   createdAt: Date;
 
