@@ -36,7 +36,9 @@ export class User {
   @JoinColumn()
   profile: Profile;
 
-  @OneToMany(() => Post, (post) => post.user)
+  @OneToMany(() => Post, (post) => post.user, {
+    onDelete: "CASCADE",
+  })
   posts: Post[];
 
   @OneToMany(() => Comment, (comment) => comment.user)

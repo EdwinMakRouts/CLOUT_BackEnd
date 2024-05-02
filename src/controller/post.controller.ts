@@ -241,11 +241,18 @@ export const update = async (req: Request, res: Response) => {
 export const remove = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const numericId = parseInt(id);
+    let numericId = parseInt(id);
 
-    const post = await postRepository.findOneBy({ id: numericId });
+    const post = await postRepository.findOne({
+      where: { id: numericId },
+      relations: { comments: true },
+    });
 
     if (!post) return handleErrorResponse(res, "Post no encontrado", 404);
+
+    for (let comment of post.comments) {
+      await commentRepository.remove(comment);
+    }
 
     await postRepository.remove(post);
     return res.json(`Post ${numericId} eliminado`);
@@ -253,6 +260,22 @@ export const remove = async (req: Request, res: Response) => {
     console.log(error);
     handleErrorResponse(res, "Error al borrar el post", 500);
   }
+};
+
+export const deletePostAndComments = async (postId: number) => {
+  const post = await postRepository.findOne({
+    where: { id: postId },
+    relations: { comments: true },
+  });
+
+  if (!post) return;
+
+  for (let comment of post.comments) {
+    await commentRepository.remove(comment);
+  }
+
+  await postRepository.remove(post);
+  return `Post ${postId} eliminado`;
 };
 
 export const like = async (req: Request, res: Response) => {

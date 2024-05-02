@@ -5,9 +5,16 @@ import { handleErrorResponse } from "../utils/handleError";
 import { Profile } from "../entity/Profile";
 import { Equal, Like } from "typeorm";
 import ImageManager from "../utils/ImageHandler";
+import { Comment } from "../entity/Comment";
+import { Post } from "../entity/Post";
+import * as postController from "../controller/post.controller";
+import { Followers } from "../entity/Followers";
 
 const userRepository = dataSource.getRepository(User);
 const profileRepository = dataSource.getRepository(Profile);
+const commentRepository = dataSource.getRepository(Comment);
+const postRepository = dataSource.getRepository(Post);
+const followersRepository = dataSource.getRepository(Followers);
 
 export const all = async (req: Request, res: Response) => {
   try {
@@ -147,10 +154,35 @@ export const remove = async (req: Request, res: Response) => {
 
     const user = await userRepository.findOne({
       where: { id: numericId },
-      relations: { profile: true },
+      relations: {
+        profile: true,
+        posts: true,
+        comments: true,
+        followers: true,
+      },
     });
 
     if (!user) return handleErrorResponse(res, "Usuario no encontrado", 404);
+
+    for (let post of user.posts) {
+      console.log(post.id);
+      postController.deletePostAndComments(post.id);
+    }
+
+    for (let comment of user.comments) {
+      await commentRepository.remove(comment);
+    }
+
+    for (let follower of user.followers) {
+      await followersRepository.remove(follower);
+    }
+
+    const following = await followersRepository.find({
+      where: { followerId: user.id },
+    });
+    for (let follow of following) {
+      await followersRepository.remove(follow);
+    }
 
     await profileRepository.remove(user.profile);
     await userRepository.remove(user);
