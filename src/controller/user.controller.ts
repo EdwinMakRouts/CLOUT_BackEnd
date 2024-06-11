@@ -84,8 +84,6 @@ export const update = async (req: Request, res: Response) => {
     }
     if (height) profile.height = height;
     if (weight) profile.weight = weight;
-    if (isPrivate) profile.isPrivate = isPrivate;
-    if (pronouns) profile.pronouns = pronouns;
     if (description) profile.description = description;
     if (instagram) profile.instagram = "https://www.instagram.com/" + instagram;
     if (twitter) profile.twitter = "https://www.twitter.com/" + twitter;
@@ -97,6 +95,7 @@ export const update = async (req: Request, res: Response) => {
       );
     }
     user.profile = profile;
+    profileRepository.save(profile);
     userRepository.save(user);
 
     res.json(user);
@@ -126,9 +125,7 @@ export const searchByUsername = async (req: Request, res: Response) => {
           firstName: profile.firstName,
           lastName: profile.lastName,
           age: profile.age,
-          pronouns: profile.pronouns,
           bio: profile.description,
-          isPrivate: profile.isPrivate,
           instagram: profile.instagram,
           twitter: profile.twitter,
           pinterest: profile.pinterest,

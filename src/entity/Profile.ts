@@ -31,12 +31,6 @@ export class Profile {
   @Column({ nullable: true })
   weight: number;
 
-  @Column({ default: false })
-  isPrivate: boolean;
-
-  @Column({ nullable: true })
-  pronouns: string;
-
   @Column({ nullable: true })
   description: string;
 

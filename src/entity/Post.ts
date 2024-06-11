@@ -28,11 +28,7 @@ export class Post {
   @OneToMany(() => PostLikes, (postLikes) => postLikes.post, { nullable: true })
   postLikes: PostLikes[];
 
-  @ManyToOne(() => User, (user) => user.posts, {
-    onDelete: "CASCADE",
-    cascade: true,
-    nullable: true,
-  })
+  @ManyToOne(() => User, (user) => user.posts, { nullable: true })
   user: User;
 
   @OneToMany(() => Comment, (comment) => comment.post, { nullable: true })

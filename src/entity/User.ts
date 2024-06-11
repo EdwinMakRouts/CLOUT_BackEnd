@@ -32,23 +32,18 @@ export class User {
   @OneToMany(() => PostLikes, (postLike) => postLike.user)
   likes: PostLikes[];
 
-  @OneToOne(() => Profile, { cascade: true, onDelete: "CASCADE" })
+  @OneToOne(() => Profile)
   @JoinColumn()
   profile: Profile;
 
-  @OneToMany(() => Post, (post) => post.user, {
-    onDelete: "CASCADE",
-  })
+  @OneToMany(() => Post, (post) => post.user)
   posts: Post[];
 
   @OneToMany(() => Comment, (comment) => comment.user)
   comments: Comment[];
 
   // Relación uno a muchos con Follower
-  @OneToMany(() => Followers, (follower) => follower.user, {
-    cascade: true,
-    onDelete: "CASCADE",
-  })
+  @OneToMany(() => Followers, (follower) => follower.user)
   followers: Followers[];
 
   @CreateDateColumn()

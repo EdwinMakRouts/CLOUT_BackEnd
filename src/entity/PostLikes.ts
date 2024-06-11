@@ -13,10 +13,10 @@ export class PostLikes {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (user) => user.likes, { onDelete: "CASCADE" })
+  @ManyToOne(() => User, (user) => user.likes)
   user: User;
 
-  @ManyToOne(() => Post, (post) => post.postLikes, { onDelete: "CASCADE" })
+  @ManyToOne(() => Post, (post) => post.postLikes)
   post: Post;
 
   @CreateDateColumn()
