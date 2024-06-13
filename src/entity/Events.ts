@@ -6,7 +6,12 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToOne,
+  ManyToMany,
+  JoinColumn,
 } from "typeorm";
+import { Post } from "./Post";
+import { User } from "./User";
 
 @Entity()
 export class Events {
@@ -16,14 +21,21 @@ export class Events {
   @Column()
   title: string;
 
-  @Column()
+  @Column({ nullable: true })
   description: string;
 
-  @Column()
-  date: Date;
+  @Column({ nullable: true })
+  location: string;
 
   @Column()
-  location: string;
+  ownerId: number;
+
+  @OneToOne(() => Post, (post) => post.events)
+  @JoinColumn()
+  post: Post;
+
+  @Column("simple-array", { nullable: true })
+  friendsId: number[];
 
   @CreateDateColumn()
   createdAt: Date;

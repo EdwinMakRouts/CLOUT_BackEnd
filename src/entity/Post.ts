@@ -6,10 +6,12 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToOne,
 } from "typeorm";
 import { User } from "./User";
 import { Comment } from "./Comment";
 import { PostLikes } from "./PostLikes";
+import { Events } from "./Events";
 
 @Entity()
 export class Post {
@@ -33,6 +35,9 @@ export class Post {
 
   @OneToMany(() => Comment, (comment) => comment.post, { nullable: true })
   comments: Comment[];
+
+  @OneToOne(() => Events, (events) => events.post, { nullable: true })
+  events: Events;
 
   @CreateDateColumn()
   createdAt: Date;

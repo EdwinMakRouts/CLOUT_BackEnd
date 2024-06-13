@@ -109,7 +109,16 @@ export const getCreatedPostsByDate = async (req: Request, res: Response) => {
           }
         });
 
-        return res.json(posts);
+        let post_with_events = [];
+        for (let post of posts) {
+          const postWithEvents = await postRepository.find({
+            where: { id: post.id },
+            relations: { events: true },
+          });
+          post_with_events.push(postWithEvents[0]);
+        }
+
+        return res.json(post_with_events);
       }
     } else {
       handleErrorResponse(res, "Usuario no encontrado", 404);

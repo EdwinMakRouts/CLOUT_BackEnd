@@ -145,6 +145,9 @@ export const searchByUsername = async (req: Request, res: Response) => {
 };
 
 export const remove = async (req: Request, res: Response) => {
+  let hasReachd = false;
+  let auxUser = null;
+
   try {
     const { id } = req.params;
     const numericId = parseInt(id);
@@ -162,7 +165,6 @@ export const remove = async (req: Request, res: Response) => {
     if (!user) return handleErrorResponse(res, "Usuario no encontrado", 404);
 
     for (let post of user.posts) {
-      console.log(post.id);
       postController.deletePostAndComments(post.id);
     }
 
@@ -181,11 +183,20 @@ export const remove = async (req: Request, res: Response) => {
       await followersRepository.remove(follow);
     }
 
-    await profileRepository.remove(user.profile);
+    hasReachd = true;
+    auxUser = user;
+
     await userRepository.remove(user);
+    await profileRepository.remove(user.profile);
 
     return res.json("Usuario eliminado");
   } catch (error) {
+    if (hasReachd) {
+      await userRepository.remove(auxUser);
+      await profileRepository.remove(auxUser.profile);
+      return res.json("Usuario eliminado");
+    }
+
     handleErrorResponse(res, "Error al eliminar el usuario", 500);
   }
 };

@@ -6,11 +6,13 @@ import { Post } from "../entity/Post";
 import ImageManager from "../utils/ImageHandler";
 import { PostLikes } from "../entity/PostLikes";
 import { Comment } from "../entity/Comment";
+import { Events } from "../entity/Events";
 
 const userRepository = dataSource.getRepository(User);
 const postRepository = dataSource.getRepository(Post);
 const commentRepository = dataSource.getRepository(Comment);
 const postLikesRepository = dataSource.getRepository(PostLikes);
+const eventRepository = dataSource.getRepository(Events);
 
 export const getAll = async (req: Request, res: Response) => {
   try {
@@ -140,7 +142,8 @@ export const create = async (req: Request, res: Response) => {
   let imageManager = new ImageManager();
 
   try {
-    const { userId, text, image } = req.body;
+    const { userId, text, image, title, description, location, friendsId } =
+      req.body;
 
     const numericId = parseInt(userId);
     const currentUser = await userRepository.findOne({
@@ -167,6 +170,31 @@ export const create = async (req: Request, res: Response) => {
       image
     );
     newPost.user = currentUser;
+
+    if (title) {
+      const newEvent = new Events();
+      newEvent.title = title;
+      newEvent.ownerId = numericId;
+
+      if (description) newEvent.description = description;
+
+      if (location) newEvent.location = location;
+
+      if (friendsId) {
+        const auxFriendsId = [];
+        for (let friendId of friendsId) {
+          auxFriendsId.push(friendId);
+        }
+        newEvent.friendsId = auxFriendsId;
+      } else {
+        newEvent.friendsId = [];
+      }
+
+      newPost.events = newEvent;
+      console.log(newPost.events);
+
+      await eventRepository.save(newEvent);
+    }
 
     const post = await postRepository.save(newPost);
 
@@ -245,13 +273,21 @@ export const remove = async (req: Request, res: Response) => {
 
     const post = await postRepository.findOne({
       where: { id: numericId },
-      relations: { comments: true },
+      relations: { comments: true, postLikes: true, events: true },
     });
 
     if (!post) return handleErrorResponse(res, "Post no encontrado", 404);
 
     for (let comment of post.comments) {
       await commentRepository.remove(comment);
+    }
+
+    for (let like of post.postLikes) {
+      await postLikesRepository.remove(like);
+    }
+
+    if (post.events) {
+      await eventRepository.remove(post.events);
     }
 
     await postRepository.remove(post);
@@ -265,13 +301,21 @@ export const remove = async (req: Request, res: Response) => {
 export const deletePostAndComments = async (postId: number) => {
   const post = await postRepository.findOne({
     where: { id: postId },
-    relations: { comments: true },
+    relations: { comments: true, postLikes: true, events: true },
   });
 
   if (!post) return;
 
   for (let comment of post.comments) {
     await commentRepository.remove(comment);
+  }
+
+  for (let like of post.postLikes) {
+    await postLikesRepository.remove(like);
+  }
+
+  if (post.events) {
+    await eventRepository.remove(post.events);
   }
 
   await postRepository.remove(post);
