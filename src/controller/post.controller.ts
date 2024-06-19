@@ -176,9 +176,9 @@ export const create = async (req: Request, res: Response) => {
       newEvent.title = title;
       newEvent.ownerId = numericId;
 
-      if (description) newEvent.description = description;
+      if (description && description != "") newEvent.description = description;
 
-      if (location) newEvent.location = location;
+      if (location && location != "") newEvent.location = location;
 
       if (friendsId) {
         const auxFriendsId = [];
