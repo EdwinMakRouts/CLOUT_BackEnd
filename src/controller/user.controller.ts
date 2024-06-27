@@ -9,12 +9,16 @@ import { Comment } from "../entity/Comment";
 import { Post } from "../entity/Post";
 import * as postController from "../controller/post.controller";
 import { Followers } from "../entity/Followers";
+import { Chat } from "../entity/Chat";
+import { Message } from "../entity/Message";
 
 const userRepository = dataSource.getRepository(User);
 const profileRepository = dataSource.getRepository(Profile);
 const commentRepository = dataSource.getRepository(Comment);
 const postRepository = dataSource.getRepository(Post);
 const followersRepository = dataSource.getRepository(Followers);
+const chatRepository = dataSource.getRepository(Chat);
+const messageRepository = dataSource.getRepository(Message);
 
 export const all = async (req: Request, res: Response) => {
   try {
@@ -181,6 +185,19 @@ export const remove = async (req: Request, res: Response) => {
     });
     for (let follow of following) {
       await followersRepository.remove(follow);
+    }
+
+    const chats = await chatRepository.find({
+      where: [{ userId_1: user.id }, { userId_2: user.id }],
+      relations: { messages: true },
+    });
+
+    for (let chat of chats) {
+      for (let message of chat.messages) {
+        await messageRepository.remove(message);
+      }
+
+      await chatRepository.remove(chat);
     }
 
     hasReachd = true;
