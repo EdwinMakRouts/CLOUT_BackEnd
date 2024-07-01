@@ -52,6 +52,7 @@ export const createMessage = async (req: Request, res: Response) => {
       const newMessage = messageRepository.create({
         chat: newChat,
         message,
+        userId: myId,
         createdAt: date,
       });
 
@@ -62,6 +63,7 @@ export const createMessage = async (req: Request, res: Response) => {
       const newMessage = messageRepository.create({
         chat: chat,
         message,
+        userId: myId,
         createdAt: date,
       });
 
@@ -141,7 +143,7 @@ export const isThereNewMessagesInChat = async (req: Request, res: Response) => {
     const numericId = parseInt(id);
     const numericChatId = parseInt(chatId);
 
-    if (chatId) {
+    if (numericChatId != 0) {
       const chat = await chatRepository.findOne({
         where: { id: numericChatId },
       });
@@ -175,16 +177,33 @@ export const isThereNewMessagesInChat = async (req: Request, res: Response) => {
           if (chat.lastConnectionUser_1 < chat.lastMessageDate) {
             return res.json({ newMessages: true });
           }
-          return res.json({ newMessages: false });
         } else if (chat.userId_2 == numericId) {
           if (chat.lastConnectionUser_2 < chat.lastMessageDate) {
             return res.json({ newMessages: true });
           }
-          return res.json({ newMessages: false });
         }
       }
+      return res.json({ newMessages: false });
     }
   } catch (error) {
     handleErrorResponse(res, "Error al comprobar nuevos mensajes", 500);
+  }
+};
+
+export const deleteAllChats = async (req: Request, res: Response) => {
+  try {
+    const chats = await chatRepository.find({
+      relations: { messages: true },
+    });
+    for (let chat of chats) {
+      for (let message of chat.messages) {
+        await messageRepository.remove(message);
+      }
+      await chatRepository.remove(chat);
+    }
+
+    return res.json({ message: "Todos los chats han sido eliminados" });
+  } catch (error) {
+    handleErrorResponse(res, "Error al eliminar los chats", 500);
   }
 };

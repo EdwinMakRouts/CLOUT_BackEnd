@@ -34,7 +34,7 @@ export const getAll = async (req: Request, res: Response) => {
     });
 
     if (!posts) {
-      return handleErrorResponse(res, "No hay posts", 404);
+      return res.json([]);
     }
 
     const sanitazedPost = await Promise.all(
@@ -103,7 +103,7 @@ export const getById = async (req: Request, res: Response) => {
     });
 
     if (!post) {
-      return handleErrorResponse(res, "Post no encontrado", 404);
+      return res.json([]);
     }
 
     const user = await userRepository.findOne({
@@ -513,7 +513,7 @@ export const getPosts = async (req: Request, res: Response) => {
     });
 
     if (posts.length === 0) {
-      return handleErrorResponse(res, "No hay posts", 404);
+      return res.json([]);
     }
 
     // Filter the posts to only return the ones created by the user

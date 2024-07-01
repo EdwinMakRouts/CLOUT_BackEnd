@@ -21,5 +21,8 @@ export class Message {
   message: string;
 
   @Column()
+  userId: number;
+
+  @Column()
   createdAt: Date;
 }

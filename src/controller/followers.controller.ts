@@ -7,6 +7,24 @@ import { handleErrorResponse } from "../utils/handleError";
 const userRepository = dataSource.getRepository(User);
 const followersRepository = dataSource.getRepository(Followers);
 
+export const getAllUsers = async (req: Request, res: Response) => {
+  try {
+    const users = await userRepository.find({
+      relations: { profile: true },
+    });
+    const sanitizedUsers = users.map((user) => {
+      return {
+        id: user.id,
+        username: user.username,
+        avatar: user.profile.avatar,
+      };
+    });
+    return res.json(sanitizedUsers);
+  } catch (error) {
+    handleErrorResponse(res, "Error al obtener los usuarios", 500);
+  }
+};
+
 // Usuarios a los que sigue el usuario con el id especificado
 export const getFollowing = async (req: Request, res: Response) => {
   try {
@@ -18,8 +36,7 @@ export const getFollowing = async (req: Request, res: Response) => {
       relations: { user: true },
     });
 
-    if (users.length === 0)
-      return handleErrorResponse(res, "No estas siguiendo a nadie", 404);
+    if (users.length === 0) return res.json([]);
 
     const sanitazedFollowers = await Promise.all(
       users.map(async (follower) => {

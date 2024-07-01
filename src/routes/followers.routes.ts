@@ -3,6 +3,7 @@ import * as followersController from "../controller/followers.controller";
 
 const router = Router();
 
+router.get("/", followersController.getAllUsers);
 router.get("/:id", followersController.getFollowers);
 router.get("/:id/following", followersController.getFollowing);
 router.post("/:id/follow", followersController.follow);
