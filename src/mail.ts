@@ -152,3 +152,75 @@ export const deleteUserHTML = `
 </body>
 </html>
 `;
+
+export const passwordResetHTML = `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cambio de Contraseña</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #333;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background-color: #007bff;
+            padding: 20px;
+            text-align: center;
+            color: #ffffff;
+        }
+        .header h1 {
+            margin: 0;
+        }
+        .content {
+            padding: 20px;
+        }
+        .content p {
+            font-size: 16px;
+            line-height: 1.5;
+            color: #fff;
+        }
+        .footer {
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+            color: #bbb;
+        }
+        a {
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Cambio de Contraseña</h1>
+        </div>
+        <div class="content">
+            <p>Hola,</p>
+            <p>Has solicitado cambiar tu contraseña en <strong>Clout</strong>. Por favor, introduce el siguiente código para completar el proceso:</p>
+            <p style="font-size: 24px; font-weight: bold; color: #4CAF50;">[CÓDIGO]</p>
+            <p>Si no solicitaste este cambio, por favor ignora este mensaje.</p>
+            <p>Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos.</p>
+            <p>Saludos,<br>El equipo de Clout</p>
+        </div>
+        <div class="footer">
+            <p>&copy; 2024 Clout. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</body>
+</html>
+`;
