@@ -11,6 +11,7 @@ import * as postController from "../controller/post.controller";
 import { Followers } from "../entity/Followers";
 import { Chat } from "../entity/Chat";
 import { Message } from "../entity/Message";
+import { deleteUserHTML, transporter } from "../mail";
 
 const userRepository = dataSource.getRepository(User);
 const profileRepository = dataSource.getRepository(Profile);
@@ -205,18 +206,36 @@ export const remove = async (req: Request, res: Response) => {
 
     await userRepository.remove(user);
     await profileRepository.remove(user.profile);
+    await enviarBorrarUsuario(auxUser.email);
 
     return res.json("Usuario eliminado");
   } catch (error) {
     if (hasReachd) {
       await userRepository.remove(auxUser);
       await profileRepository.remove(auxUser.profile);
+
+      await enviarBorrarUsuario(auxUser.email);
       return res.json("Usuario eliminado");
     }
 
     handleErrorResponse(res, "Error al eliminar el usuario", 500);
   }
 };
+
+async function enviarBorrarUsuario(email: string) {
+  try {
+    await transporter.sendMail({
+      from: "'Confirmacion borrar usuario' <clout.red.social@gmail.com>",
+      to: email,
+      subject: "Borrado exitoso de usuario en nuestra aplicación",
+      html: deleteUserHTML,
+    });
+
+    console.log("Correo enviado exitosamente");
+  } catch (error) {
+    console.error("Error al enviar el correo:", error);
+  }
+}
 
 export const checkUsername = async (req: Request, res: Response) => {
   try {
