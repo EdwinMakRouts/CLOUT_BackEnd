@@ -12,6 +12,7 @@ import { Followers } from "../entity/Followers";
 import { Chat } from "../entity/Chat";
 import { Message } from "../entity/Message";
 import { deleteUserHTML, transporter } from "../mail";
+import { Code } from "../entity/Code";
 
 const userRepository = dataSource.getRepository(User);
 const profileRepository = dataSource.getRepository(Profile);
@@ -20,6 +21,7 @@ const postRepository = dataSource.getRepository(Post);
 const followersRepository = dataSource.getRepository(Followers);
 const chatRepository = dataSource.getRepository(Chat);
 const messageRepository = dataSource.getRepository(Message);
+const passwordRepository = dataSource.getRepository(Code);
 
 export const all = async (req: Request, res: Response) => {
   try {
@@ -204,6 +206,12 @@ export const remove = async (req: Request, res: Response) => {
     hasReachd = true;
     auxUser = user;
 
+    const code = await passwordRepository.findOne({
+      where: { email: user.email },
+    });
+
+    if (code) await passwordRepository.remove(code);
+
     await userRepository.remove(user);
     await profileRepository.remove(user.profile);
     await enviarBorrarUsuario(auxUser.email);
@@ -211,6 +219,12 @@ export const remove = async (req: Request, res: Response) => {
     return res.json("Usuario eliminado");
   } catch (error) {
     if (hasReachd) {
+      const code = await passwordRepository.findOne({
+        where: { email: auxUser.email },
+      });
+
+      if (code) await passwordRepository.remove(code);
+
       await userRepository.remove(auxUser);
       await profileRepository.remove(auxUser.profile);
 

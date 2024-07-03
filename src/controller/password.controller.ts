@@ -42,6 +42,21 @@ export const forgot = async (req: Request, res: Response) => {
   res.json({ message: "Código enviado al correo" });
 };
 
+export const code = async (req: Request, res: Response) => {
+  const { email, code } = req.body;
+  if (!email || !code) {
+    return handleErrorResponse(res, "Email y código requeridos", 400);
+  }
+
+  const codeFound = await codeRepository.findOneBy({ email, code });
+
+  if (!codeFound) {
+    return handleErrorResponse(res, "Código incorrecto", 400);
+  }
+
+  res.json({ message: "Código correcto" });
+};
+
 export const reset = async (req: Request, res: Response) => {
   const { email, code, password } = req.body;
   if (!email || !code || !password) {
