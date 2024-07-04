@@ -207,3 +207,40 @@ export const deleteAllChats = async (req: Request, res: Response) => {
     handleErrorResponse(res, "Error al eliminar los chats", 500);
   }
 };
+
+const axios = require("axios");
+export const chatPDF = async (req: Request, res: Response) => {
+  try {
+    const { message } = req.body;
+
+    if (!message) return handleErrorResponse(res, "Mensaje requerido", 400);
+
+    const config = {
+      headers: {
+        "x-api-key": process.env.CHATPDF_KEY,
+        "Content-Type": "application/json",
+      },
+    };
+
+    const data = {
+      sourceId: process.env.CHATPDF_SOURCE,
+      messages: [
+        {
+          role: "user",
+          content: message,
+        },
+      ],
+    };
+
+    axios
+      .post("https://api.chatpdf.com/v1/chats/message", data, config)
+      .then((response) => {
+        return res.json(response.data);
+      })
+      .catch((error) => {
+        handleErrorResponse(res, "Error respuesta", 500);
+      });
+  } catch (error) {
+    handleErrorResponse(res, "Error respuesta", 500);
+  }
+};
