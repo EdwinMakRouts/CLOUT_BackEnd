@@ -13,6 +13,7 @@ import { Chat } from "../entity/Chat";
 import { Message } from "../entity/Message";
 import { deleteUserHTML, transporter } from "../mail";
 import { Code } from "../entity/Code";
+import { PostLikes } from "../entity/PostLikes";
 
 const userRepository = dataSource.getRepository(User);
 const profileRepository = dataSource.getRepository(Profile);
@@ -22,6 +23,7 @@ const followersRepository = dataSource.getRepository(Followers);
 const chatRepository = dataSource.getRepository(Chat);
 const messageRepository = dataSource.getRepository(Message);
 const passwordRepository = dataSource.getRepository(Code);
+const postLikesRepository = dataSource.getRepository(PostLikes);
 
 export const all = async (req: Request, res: Response) => {
   try {
@@ -166,10 +168,15 @@ export const remove = async (req: Request, res: Response) => {
         posts: true,
         comments: true,
         followers: true,
+        likes: true,
       },
     });
 
     if (!user) return handleErrorResponse(res, "Usuario no encontrado", 404);
+
+    for (let like of user.likes) {
+      await postLikesRepository.remove(like);
+    }
 
     for (let post of user.posts) {
       postController.deletePostAndComments(post.id);
